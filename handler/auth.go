@@ -36,14 +36,18 @@ func (r *AuthHandle) Login(c *fiber.Ctx) error {
 	var input LoginInput
 
 	if err := c.BodyParser(&input); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "Invalid information", "data": err})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "Invalid information", "data": err.Error()})
 	}
 	username := input.Username
 	password := input.Password
 
 	user, err := r.repo.GetUser(username)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "Invalid username or password", "data": err})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "Invalid username or password", "data": err.Error()})
+	}
+
+	if user == nil || user.Username == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "Invalid username or password", "data": nil})
 	}
 
 	if !common.CheckPasswordHash(password, user.Password) {
@@ -59,7 +63,7 @@ func (r *AuthHandle) Login(c *fiber.Ctx) error {
 
 	t, err := token.SignedString([]byte(config.Config("SECRET")))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": "error", "message": "Invalid username or password", "data": nil})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": "error", "message": "Invalid username or password", "data": err.Error()})
 	}
 
 	return c.JSON(fiber.Map{"status": "success", "message": "Success login", "data": t})

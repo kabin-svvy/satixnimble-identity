@@ -1,5 +1,5 @@
 version: '3.8'
-services: 
+services:
   postgres:
     image: postgres:13.4-alpine
     restart: always
@@ -16,3 +16,9 @@ services:
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
       - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+  # app:
+  #   image: golang:1.17.0-alpine3.14
+  #   volumes: 
+  #     - .:/go/src/go-with-compose
+  #   working_dir: /go/src/go-with-compose
+  #   command: go run .
